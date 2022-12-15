@@ -1058,6 +1058,10 @@ a {
   box-shadow: 14px 14px 34px 0 rgba(0, 0, 0, 0.1);
 }
 
+.div-block-2.contact {
+  position: static;
+}
+
 .property-list {
   display: -webkit-box;
   display: -webkit-flex;
