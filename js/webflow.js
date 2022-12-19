@@ -110,7 +110,7 @@ module.exports =
   // eslint-disable-next-line no-new-func -- fallback
   (function () { return this; })() || Function('return this')();
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(26)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(25)))
 
 /***/ }),
 /* 1 */
@@ -1672,7 +1672,7 @@ module.exports = Symbol;
 /* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isSymbol = __webpack_require__(39);
+var isSymbol = __webpack_require__(38);
 
 /** Used as references for various `Number` constants. */
 var INFINITY = 1 / 0;
@@ -1697,6 +1697,379 @@ module.exports = toKey;
 
 /***/ }),
 /* 25 */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || new Function("return this")();
+} catch (e) {
+	// This works if the window reference is available
+	if (typeof window === "object") g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// toObject with fallback for non-array-like ES3 strings
+var IndexedObject = __webpack_require__(144);
+var requireObjectCoercible = __webpack_require__(72);
+
+module.exports = function (it) {
+  return IndexedObject(requireObjectCoercible(it));
+};
+
+
+/***/ }),
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var global = __webpack_require__(0);
+var isCallable = __webpack_require__(7);
+
+var aFunction = function (argument) {
+  return isCallable(argument) ? argument : undefined;
+};
+
+module.exports = function (namespace, method) {
+  return arguments.length < 2 ? aFunction(global[namespace]) : global[namespace] && global[namespace][method];
+};
+
+
+/***/ }),
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var global = __webpack_require__(0);
+var DESCRIPTORS = __webpack_require__(13);
+var IE8_DOM_DEFINE = __webpack_require__(80);
+var anObject = __webpack_require__(29);
+var toPropertyKey = __webpack_require__(73);
+
+var TypeError = global.TypeError;
+// eslint-disable-next-line es/no-object-defineproperty -- safe
+var $defineProperty = Object.defineProperty;
+
+// `Object.defineProperty` method
+// https://tc39.es/ecma262/#sec-object.defineproperty
+exports.f = DESCRIPTORS ? $defineProperty : function defineProperty(O, P, Attributes) {
+  anObject(O);
+  P = toPropertyKey(P);
+  anObject(Attributes);
+  if (IE8_DOM_DEFINE) try {
+    return $defineProperty(O, P, Attributes);
+  } catch (error) { /* empty */ }
+  if ('get' in Attributes || 'set' in Attributes) throw TypeError('Accessors not supported');
+  if ('value' in Attributes) O[P] = Attributes.value;
+  return O;
+};
+
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var global = __webpack_require__(0);
+var isObject = __webpack_require__(20);
+
+var String = global.String;
+var TypeError = global.TypeError;
+
+// `Assert: Type(argument) is Object`
+module.exports = function (argument) {
+  if (isObject(argument)) return argument;
+  throw TypeError(String(argument) + ' is not an object');
+};
+
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports) {
+
+function _extends() {
+  module.exports = _extends = Object.assign || function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+
+    return target;
+  };
+
+  return _extends.apply(this, arguments);
+}
+
+module.exports = _extends;
+
+/***/ }),
+/* 31 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var listCacheClear = __webpack_require__(196),
+    listCacheDelete = __webpack_require__(197),
+    listCacheGet = __webpack_require__(198),
+    listCacheHas = __webpack_require__(199),
+    listCacheSet = __webpack_require__(200);
+
+/**
+ * Creates an list cache object.
+ *
+ * @private
+ * @constructor
+ * @param {Array} [entries] The key-value pairs to cache.
+ */
+function ListCache(entries) {
+  var index = -1,
+      length = entries == null ? 0 : entries.length;
+
+  this.clear();
+  while (++index < length) {
+    var entry = entries[index];
+    this.set(entry[0], entry[1]);
+  }
+}
+
+// Add methods to `ListCache`.
+ListCache.prototype.clear = listCacheClear;
+ListCache.prototype['delete'] = listCacheDelete;
+ListCache.prototype.get = listCacheGet;
+ListCache.prototype.has = listCacheHas;
+ListCache.prototype.set = listCacheSet;
+
+module.exports = ListCache;
+
+
+/***/ }),
+/* 32 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var eq = __webpack_require__(49);
+
+/**
+ * Gets the index at which the `key` is found in `array` of key-value pairs.
+ *
+ * @private
+ * @param {Array} array The array to inspect.
+ * @param {*} key The key to search for.
+ * @returns {number} Returns the index of the matched value, else `-1`.
+ */
+function assocIndexOf(array, key) {
+  var length = array.length;
+  while (length--) {
+    if (eq(array[length][0], key)) {
+      return length;
+    }
+  }
+  return -1;
+}
+
+module.exports = assocIndexOf;
+
+
+/***/ }),
+/* 33 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var getNative = __webpack_require__(11);
+
+/* Built-in method references that are verified to be native. */
+var nativeCreate = getNative(Object, 'create');
+
+module.exports = nativeCreate;
+
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var isKeyable = __webpack_require__(220);
+
+/**
+ * Gets the data for `map`.
+ *
+ * @private
+ * @param {Object} map The map to query.
+ * @param {string} key The reference key.
+ * @returns {*} Returns the map data.
+ */
+function getMapData(map, key) {
+  var data = map.__data__;
+  return isKeyable(key)
+    ? data[typeof key == 'string' ? 'string' : 'hash']
+    : data.map;
+}
+
+module.exports = getMapData;
+
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var arrayLikeKeys = __webpack_require__(106),
+    baseKeys = __webpack_require__(57),
+    isArrayLike = __webpack_require__(16);
+
+/**
+ * Creates an array of the own enumerable property names of `object`.
+ *
+ * **Note:** Non-object values are coerced to objects. See the
+ * [ES spec](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
+ * for more details.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ *   this.b = 2;
+ * }
+ *
+ * Foo.prototype.c = 3;
+ *
+ * _.keys(new Foo);
+ * // => ['a', 'b'] (iteration order is not guaranteed)
+ *
+ * _.keys('hi');
+ * // => ['0', '1']
+ */
+function keys(object) {
+  return isArrayLike(object) ? arrayLikeKeys(object) : baseKeys(object);
+}
+
+module.exports = keys;
+
+
+/***/ }),
+/* 36 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var baseIsArguments = __webpack_require__(238),
+    isObjectLike = __webpack_require__(12);
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/** Built-in value references. */
+var propertyIsEnumerable = objectProto.propertyIsEnumerable;
+
+/**
+ * Checks if `value` is likely an `arguments` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an `arguments` object,
+ *  else `false`.
+ * @example
+ *
+ * _.isArguments(function() { return arguments; }());
+ * // => true
+ *
+ * _.isArguments([1, 2, 3]);
+ * // => false
+ */
+var isArguments = baseIsArguments(function() { return arguments; }()) ? baseIsArguments : function(value) {
+  return isObjectLike(value) && hasOwnProperty.call(value, 'callee') &&
+    !propertyIsEnumerable.call(value, 'callee');
+};
+
+module.exports = isArguments;
+
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var isArray = __webpack_require__(2),
+    isKey = __webpack_require__(62),
+    stringToPath = __webpack_require__(249),
+    toString = __webpack_require__(252);
+
+/**
+ * Casts `value` to a path array if it's not one.
+ *
+ * @private
+ * @param {*} value The value to inspect.
+ * @param {Object} [object] The object to query keys on.
+ * @returns {Array} Returns the cast property path array.
+ */
+function castPath(value, object) {
+  if (isArray(value)) {
+    return value;
+  }
+  return isKey(value, object) ? [value] : stringToPath(toString(value));
+}
+
+module.exports = castPath;
+
+
+/***/ }),
+/* 38 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var baseGetTag = __webpack_require__(15),
+    isObjectLike = __webpack_require__(12);
+
+/** `Object#toString` result references. */
+var symbolTag = '[object Symbol]';
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike(value) && baseGetTag(value) == symbolTag);
+}
+
+module.exports = isSymbol;
+
+
+/***/ }),
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1745,379 +2118,6 @@ $.extend(api.triggers, eventTriggers);
 module.exports = api;
 
 /***/ }),
-/* 26 */
-/***/ (function(module, exports) {
-
-var g;
-
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
-
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || new Function("return this")();
-} catch (e) {
-	// This works if the window reference is available
-	if (typeof window === "object") g = window;
-}
-
-// g can still be undefined, but nothing to do about it...
-// We return undefined, instead of nothing here, so it's
-// easier to handle this case. if(!global) { ...}
-
-module.exports = g;
-
-
-/***/ }),
-/* 27 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// toObject with fallback for non-array-like ES3 strings
-var IndexedObject = __webpack_require__(144);
-var requireObjectCoercible = __webpack_require__(72);
-
-module.exports = function (it) {
-  return IndexedObject(requireObjectCoercible(it));
-};
-
-
-/***/ }),
-/* 28 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var global = __webpack_require__(0);
-var isCallable = __webpack_require__(7);
-
-var aFunction = function (argument) {
-  return isCallable(argument) ? argument : undefined;
-};
-
-module.exports = function (namespace, method) {
-  return arguments.length < 2 ? aFunction(global[namespace]) : global[namespace] && global[namespace][method];
-};
-
-
-/***/ }),
-/* 29 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var global = __webpack_require__(0);
-var DESCRIPTORS = __webpack_require__(13);
-var IE8_DOM_DEFINE = __webpack_require__(80);
-var anObject = __webpack_require__(30);
-var toPropertyKey = __webpack_require__(73);
-
-var TypeError = global.TypeError;
-// eslint-disable-next-line es/no-object-defineproperty -- safe
-var $defineProperty = Object.defineProperty;
-
-// `Object.defineProperty` method
-// https://tc39.es/ecma262/#sec-object.defineproperty
-exports.f = DESCRIPTORS ? $defineProperty : function defineProperty(O, P, Attributes) {
-  anObject(O);
-  P = toPropertyKey(P);
-  anObject(Attributes);
-  if (IE8_DOM_DEFINE) try {
-    return $defineProperty(O, P, Attributes);
-  } catch (error) { /* empty */ }
-  if ('get' in Attributes || 'set' in Attributes) throw TypeError('Accessors not supported');
-  if ('value' in Attributes) O[P] = Attributes.value;
-  return O;
-};
-
-
-/***/ }),
-/* 30 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var global = __webpack_require__(0);
-var isObject = __webpack_require__(20);
-
-var String = global.String;
-var TypeError = global.TypeError;
-
-// `Assert: Type(argument) is Object`
-module.exports = function (argument) {
-  if (isObject(argument)) return argument;
-  throw TypeError(String(argument) + ' is not an object');
-};
-
-
-/***/ }),
-/* 31 */
-/***/ (function(module, exports) {
-
-function _extends() {
-  module.exports = _extends = Object.assign || function (target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i];
-
-      for (var key in source) {
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
-          target[key] = source[key];
-        }
-      }
-    }
-
-    return target;
-  };
-
-  return _extends.apply(this, arguments);
-}
-
-module.exports = _extends;
-
-/***/ }),
-/* 32 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var listCacheClear = __webpack_require__(196),
-    listCacheDelete = __webpack_require__(197),
-    listCacheGet = __webpack_require__(198),
-    listCacheHas = __webpack_require__(199),
-    listCacheSet = __webpack_require__(200);
-
-/**
- * Creates an list cache object.
- *
- * @private
- * @constructor
- * @param {Array} [entries] The key-value pairs to cache.
- */
-function ListCache(entries) {
-  var index = -1,
-      length = entries == null ? 0 : entries.length;
-
-  this.clear();
-  while (++index < length) {
-    var entry = entries[index];
-    this.set(entry[0], entry[1]);
-  }
-}
-
-// Add methods to `ListCache`.
-ListCache.prototype.clear = listCacheClear;
-ListCache.prototype['delete'] = listCacheDelete;
-ListCache.prototype.get = listCacheGet;
-ListCache.prototype.has = listCacheHas;
-ListCache.prototype.set = listCacheSet;
-
-module.exports = ListCache;
-
-
-/***/ }),
-/* 33 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var eq = __webpack_require__(49);
-
-/**
- * Gets the index at which the `key` is found in `array` of key-value pairs.
- *
- * @private
- * @param {Array} array The array to inspect.
- * @param {*} key The key to search for.
- * @returns {number} Returns the index of the matched value, else `-1`.
- */
-function assocIndexOf(array, key) {
-  var length = array.length;
-  while (length--) {
-    if (eq(array[length][0], key)) {
-      return length;
-    }
-  }
-  return -1;
-}
-
-module.exports = assocIndexOf;
-
-
-/***/ }),
-/* 34 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var getNative = __webpack_require__(11);
-
-/* Built-in method references that are verified to be native. */
-var nativeCreate = getNative(Object, 'create');
-
-module.exports = nativeCreate;
-
-
-/***/ }),
-/* 35 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var isKeyable = __webpack_require__(220);
-
-/**
- * Gets the data for `map`.
- *
- * @private
- * @param {Object} map The map to query.
- * @param {string} key The reference key.
- * @returns {*} Returns the map data.
- */
-function getMapData(map, key) {
-  var data = map.__data__;
-  return isKeyable(key)
-    ? data[typeof key == 'string' ? 'string' : 'hash']
-    : data.map;
-}
-
-module.exports = getMapData;
-
-
-/***/ }),
-/* 36 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var arrayLikeKeys = __webpack_require__(106),
-    baseKeys = __webpack_require__(57),
-    isArrayLike = __webpack_require__(16);
-
-/**
- * Creates an array of the own enumerable property names of `object`.
- *
- * **Note:** Non-object values are coerced to objects. See the
- * [ES spec](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
- * for more details.
- *
- * @static
- * @since 0.1.0
- * @memberOf _
- * @category Object
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- * @example
- *
- * function Foo() {
- *   this.a = 1;
- *   this.b = 2;
- * }
- *
- * Foo.prototype.c = 3;
- *
- * _.keys(new Foo);
- * // => ['a', 'b'] (iteration order is not guaranteed)
- *
- * _.keys('hi');
- * // => ['0', '1']
- */
-function keys(object) {
-  return isArrayLike(object) ? arrayLikeKeys(object) : baseKeys(object);
-}
-
-module.exports = keys;
-
-
-/***/ }),
-/* 37 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var baseIsArguments = __webpack_require__(238),
-    isObjectLike = __webpack_require__(12);
-
-/** Used for built-in method references. */
-var objectProto = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/** Built-in value references. */
-var propertyIsEnumerable = objectProto.propertyIsEnumerable;
-
-/**
- * Checks if `value` is likely an `arguments` object.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an `arguments` object,
- *  else `false`.
- * @example
- *
- * _.isArguments(function() { return arguments; }());
- * // => true
- *
- * _.isArguments([1, 2, 3]);
- * // => false
- */
-var isArguments = baseIsArguments(function() { return arguments; }()) ? baseIsArguments : function(value) {
-  return isObjectLike(value) && hasOwnProperty.call(value, 'callee') &&
-    !propertyIsEnumerable.call(value, 'callee');
-};
-
-module.exports = isArguments;
-
-
-/***/ }),
-/* 38 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var isArray = __webpack_require__(2),
-    isKey = __webpack_require__(62),
-    stringToPath = __webpack_require__(249),
-    toString = __webpack_require__(252);
-
-/**
- * Casts `value` to a path array if it's not one.
- *
- * @private
- * @param {*} value The value to inspect.
- * @param {Object} [object] The object to query keys on.
- * @returns {Array} Returns the cast property path array.
- */
-function castPath(value, object) {
-  if (isArray(value)) {
-    return value;
-  }
-  return isKey(value, object) ? [value] : stringToPath(toString(value));
-}
-
-module.exports = castPath;
-
-
-/***/ }),
-/* 39 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var baseGetTag = __webpack_require__(15),
-    isObjectLike = __webpack_require__(12);
-
-/** `Object#toString` result references. */
-var symbolTag = '[object Symbol]';
-
-/**
- * Checks if `value` is classified as a `Symbol` primitive or object.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
- * @example
- *
- * _.isSymbol(Symbol.iterator);
- * // => true
- *
- * _.isSymbol('abc');
- * // => false
- */
-function isSymbol(value) {
-  return typeof value == 'symbol' ||
-    (isObjectLike(value) && baseGetTag(value) == symbolTag);
-}
-
-module.exports = isSymbol;
-
-
-/***/ }),
 /* 40 */
 /***/ (function(module, exports) {
 
@@ -2164,7 +2164,7 @@ module.exports = function (key, value) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var DESCRIPTORS = __webpack_require__(13);
-var definePropertyModule = __webpack_require__(29);
+var definePropertyModule = __webpack_require__(28);
 var createPropertyDescriptor = __webpack_require__(71);
 
 module.exports = DESCRIPTORS ? function (object, key, value) {
@@ -3021,7 +3021,7 @@ module.exports = get;
 /* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var castPath = __webpack_require__(38),
+var castPath = __webpack_require__(37),
     toKey = __webpack_require__(24);
 
 /**
@@ -3052,7 +3052,7 @@ module.exports = baseGet;
 /***/ (function(module, exports, __webpack_require__) {
 
 var isArray = __webpack_require__(2),
-    isSymbol = __webpack_require__(39);
+    isSymbol = __webpack_require__(38);
 
 /** Used to match property names within property paths. */
 var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
@@ -3115,7 +3115,7 @@ module.exports = identity;
 
 var baseTrim = __webpack_require__(261),
     isObject = __webpack_require__(8),
-    isSymbol = __webpack_require__(39);
+    isSymbol = __webpack_require__(38);
 
 /** Used as references for various `Number` constants. */
 var NAN = 0 / 0;
@@ -3193,7 +3193,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.mediaQueriesDefined = exports.viewportWidthChanged = exports.actionListPlaybackChanged = exports.elementStateChanged = exports.instanceRemoved = exports.instanceStarted = exports.instanceAdded = exports.parameterChanged = exports.animationFrameChanged = exports.eventStateChanged = exports.testFrameRendered = exports.eventListenerAdded = exports.clearRequested = exports.stopRequested = exports.playbackRequested = exports.previewRequested = exports.sessionStopped = exports.sessionStarted = exports.sessionInitialized = exports.rawDataImported = void 0;
 
-var _extends2 = _interopRequireDefault(__webpack_require__(31));
+var _extends2 = _interopRequireDefault(__webpack_require__(30));
 
 var _constants = __webpack_require__(4);
 
@@ -4439,7 +4439,7 @@ var DESCRIPTORS = __webpack_require__(13);
 var call = __webpack_require__(40);
 var propertyIsEnumerableModule = __webpack_require__(143);
 var createPropertyDescriptor = __webpack_require__(71);
-var toIndexedObject = __webpack_require__(27);
+var toIndexedObject = __webpack_require__(26);
 var toPropertyKey = __webpack_require__(73);
 var hasOwn = __webpack_require__(9);
 var IE8_DOM_DEFINE = __webpack_require__(80);
@@ -4509,7 +4509,7 @@ module.exports = function (argument) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var global = __webpack_require__(0);
-var getBuiltIn = __webpack_require__(28);
+var getBuiltIn = __webpack_require__(27);
 var isCallable = __webpack_require__(7);
 var isPrototypeOf = __webpack_require__(147);
 var USE_SYMBOL_AS_UID = __webpack_require__(75);
@@ -4689,7 +4689,7 @@ module.exports = function (key) {
 
 var uncurryThis = __webpack_require__(5);
 var hasOwn = __webpack_require__(9);
-var toIndexedObject = __webpack_require__(27);
+var toIndexedObject = __webpack_require__(26);
 var indexOf = __webpack_require__(85).indexOf;
 var hiddenKeys = __webpack_require__(44);
 
@@ -4713,7 +4713,7 @@ module.exports = function (object, names) {
 /* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var toIndexedObject = __webpack_require__(27);
+var toIndexedObject = __webpack_require__(26);
 var toAbsoluteIndex = __webpack_require__(163);
 var lengthOfArrayLike = __webpack_require__(164);
 
@@ -5255,7 +5255,7 @@ module.exports = find;
 
 var baseIteratee = __webpack_require__(10),
     isArrayLike = __webpack_require__(16),
-    keys = __webpack_require__(36);
+    keys = __webpack_require__(35);
 
 /**
  * Creates a `_.find` or `_.findLast` function.
@@ -5284,7 +5284,7 @@ module.exports = createFind;
 /* 97 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var ListCache = __webpack_require__(32),
+var ListCache = __webpack_require__(31),
     stackClear = __webpack_require__(201),
     stackDelete = __webpack_require__(202),
     stackGet = __webpack_require__(203),
@@ -5365,7 +5365,7 @@ var freeGlobal = typeof global == 'object' && global && global.Object === Object
 
 module.exports = freeGlobal;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(26)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(25)))
 
 /***/ }),
 /* 100 */
@@ -5619,7 +5619,7 @@ module.exports = stubArray;
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseTimes = __webpack_require__(237),
-    isArguments = __webpack_require__(37),
+    isArguments = __webpack_require__(36),
     isArray = __webpack_require__(2),
     isBuffer = __webpack_require__(53),
     isIndex = __webpack_require__(54),
@@ -6516,7 +6516,7 @@ module.exports = baseEach;
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseFor = __webpack_require__(272),
-    keys = __webpack_require__(36);
+    keys = __webpack_require__(35);
 
 /**
  * The base implementation of `_.forOwn` without support for iteratee shorthands.
@@ -6558,7 +6558,7 @@ exports.stopAllActionGroups = stopAllActionGroups;
 exports.stopActionGroup = stopActionGroup;
 exports.startActionGroup = startActionGroup;
 
-var _extends2 = _interopRequireDefault(__webpack_require__(31));
+var _extends2 = _interopRequireDefault(__webpack_require__(30));
 
 var _objectWithoutPropertiesLoose2 = _interopRequireDefault(__webpack_require__(281));
 
@@ -7852,7 +7852,7 @@ __webpack_require__(130);
 __webpack_require__(132);
 __webpack_require__(133);
 __webpack_require__(134);
-__webpack_require__(25);
+__webpack_require__(39);
 __webpack_require__(136);
 __webpack_require__(331);
 __webpack_require__(332);
@@ -7860,8 +7860,7 @@ __webpack_require__(333);
 __webpack_require__(334);
 __webpack_require__(339);
 __webpack_require__(340);
-__webpack_require__(341);
-module.exports = __webpack_require__(342);
+module.exports = __webpack_require__(341);
 
 
 /***/ }),
@@ -9234,7 +9233,7 @@ module.exports = version;
 /* 149 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getBuiltIn = __webpack_require__(28);
+var getBuiltIn = __webpack_require__(27);
 
 module.exports = getBuiltIn('navigator', 'userAgent') || '';
 
@@ -9502,7 +9501,7 @@ module.exports = {
 var hasOwn = __webpack_require__(9);
 var ownKeys = __webpack_require__(161);
 var getOwnPropertyDescriptorModule = __webpack_require__(70);
-var definePropertyModule = __webpack_require__(29);
+var definePropertyModule = __webpack_require__(28);
 
 module.exports = function (target, source) {
   var keys = ownKeys(source);
@@ -9519,11 +9518,11 @@ module.exports = function (target, source) {
 /* 161 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getBuiltIn = __webpack_require__(28);
+var getBuiltIn = __webpack_require__(27);
 var uncurryThis = __webpack_require__(5);
 var getOwnPropertyNamesModule = __webpack_require__(162);
 var getOwnPropertySymbolsModule = __webpack_require__(166);
-var anObject = __webpack_require__(30);
+var anObject = __webpack_require__(29);
 
 var concat = uncurryThis([].concat);
 
@@ -9640,7 +9639,7 @@ module.exports = isForced;
 
 var wellKnownSymbol = __webpack_require__(77);
 var create = __webpack_require__(169);
-var definePropertyModule = __webpack_require__(29);
+var definePropertyModule = __webpack_require__(28);
 
 var UNSCOPABLES = wellKnownSymbol('unscopables');
 var ArrayPrototype = Array.prototype;
@@ -9665,7 +9664,7 @@ module.exports = function (key) {
 /***/ (function(module, exports, __webpack_require__) {
 
 /* global ActiveXObject -- old IE, WSH */
-var anObject = __webpack_require__(30);
+var anObject = __webpack_require__(29);
 var defineProperties = __webpack_require__(170);
 var enumBugKeys = __webpack_require__(45);
 var hiddenKeys = __webpack_require__(44);
@@ -9753,9 +9752,9 @@ module.exports = Object.create || function create(O, Properties) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var DESCRIPTORS = __webpack_require__(13);
-var definePropertyModule = __webpack_require__(29);
-var anObject = __webpack_require__(30);
-var toIndexedObject = __webpack_require__(27);
+var definePropertyModule = __webpack_require__(28);
+var anObject = __webpack_require__(29);
+var toIndexedObject = __webpack_require__(26);
 var objectKeys = __webpack_require__(171);
 
 // `Object.defineProperties` method
@@ -9792,7 +9791,7 @@ module.exports = Object.keys || function keys(O) {
 /* 172 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getBuiltIn = __webpack_require__(28);
+var getBuiltIn = __webpack_require__(27);
 
 module.exports = getBuiltIn('document', 'documentElement');
 
@@ -9877,7 +9876,7 @@ var freeGlobal = typeof global == 'object' && global && global.Object === Object
 
 /* harmony default export */ __webpack_exports__["default"] = (freeGlobal);
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(26)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(25)))
 
 /***/ }),
 /* 177 */
@@ -10064,7 +10063,7 @@ if (typeof self !== 'undefined') {
 var result = Object(_ponyfill_js__WEBPACK_IMPORTED_MODULE_0__["default"])(root);
 /* harmony default export */ __webpack_exports__["default"] = (result);
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(26), __webpack_require__(183)(module)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(25), __webpack_require__(183)(module)))
 
 /***/ }),
 /* 183 */
@@ -10571,7 +10570,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.ixRequest = void 0;
 
-var _extends2 = _interopRequireDefault(__webpack_require__(31));
+var _extends2 = _interopRequireDefault(__webpack_require__(30));
 
 var _constants = __webpack_require__(4);
 
@@ -10873,7 +10872,7 @@ module.exports = listCacheClear;
 /* 197 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var assocIndexOf = __webpack_require__(33);
+var assocIndexOf = __webpack_require__(32);
 
 /** Used for built-in method references. */
 var arrayProto = Array.prototype;
@@ -10914,7 +10913,7 @@ module.exports = listCacheDelete;
 /* 198 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var assocIndexOf = __webpack_require__(33);
+var assocIndexOf = __webpack_require__(32);
 
 /**
  * Gets the list cache value for `key`.
@@ -10939,7 +10938,7 @@ module.exports = listCacheGet;
 /* 199 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var assocIndexOf = __webpack_require__(33);
+var assocIndexOf = __webpack_require__(32);
 
 /**
  * Checks if a list cache value for `key` exists.
@@ -10961,7 +10960,7 @@ module.exports = listCacheHas;
 /* 200 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var assocIndexOf = __webpack_require__(33);
+var assocIndexOf = __webpack_require__(32);
 
 /**
  * Sets the list cache `key` to `value`.
@@ -10993,7 +10992,7 @@ module.exports = listCacheSet;
 /* 201 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var ListCache = __webpack_require__(32);
+var ListCache = __webpack_require__(31);
 
 /**
  * Removes all key-value entries from the stack.
@@ -11078,7 +11077,7 @@ module.exports = stackHas;
 /* 205 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var ListCache = __webpack_require__(32),
+var ListCache = __webpack_require__(31),
     Map = __webpack_require__(50),
     MapCache = __webpack_require__(51);
 
@@ -11309,7 +11308,7 @@ module.exports = getValue;
 /***/ (function(module, exports, __webpack_require__) {
 
 var Hash = __webpack_require__(213),
-    ListCache = __webpack_require__(32),
+    ListCache = __webpack_require__(31),
     Map = __webpack_require__(50);
 
 /**
@@ -11373,7 +11372,7 @@ module.exports = Hash;
 /* 214 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var nativeCreate = __webpack_require__(34);
+var nativeCreate = __webpack_require__(33);
 
 /**
  * Removes all key-value entries from the hash.
@@ -11417,7 +11416,7 @@ module.exports = hashDelete;
 /* 216 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var nativeCreate = __webpack_require__(34);
+var nativeCreate = __webpack_require__(33);
 
 /** Used to stand-in for `undefined` hash values. */
 var HASH_UNDEFINED = '__lodash_hash_undefined__';
@@ -11453,7 +11452,7 @@ module.exports = hashGet;
 /* 217 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var nativeCreate = __webpack_require__(34);
+var nativeCreate = __webpack_require__(33);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -11482,7 +11481,7 @@ module.exports = hashHas;
 /* 218 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var nativeCreate = __webpack_require__(34);
+var nativeCreate = __webpack_require__(33);
 
 /** Used to stand-in for `undefined` hash values. */
 var HASH_UNDEFINED = '__lodash_hash_undefined__';
@@ -11511,7 +11510,7 @@ module.exports = hashSet;
 /* 219 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getMapData = __webpack_require__(35);
+var getMapData = __webpack_require__(34);
 
 /**
  * Removes `key` and its value from the map.
@@ -11556,7 +11555,7 @@ module.exports = isKeyable;
 /* 221 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getMapData = __webpack_require__(35);
+var getMapData = __webpack_require__(34);
 
 /**
  * Gets the map value for `key`.
@@ -11578,7 +11577,7 @@ module.exports = mapCacheGet;
 /* 222 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getMapData = __webpack_require__(35);
+var getMapData = __webpack_require__(34);
 
 /**
  * Checks if a map value for `key` exists.
@@ -11600,7 +11599,7 @@ module.exports = mapCacheHas;
 /* 223 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getMapData = __webpack_require__(35);
+var getMapData = __webpack_require__(34);
 
 /**
  * Sets the map `key` to `value`.
@@ -12119,7 +12118,7 @@ module.exports = equalObjects;
 
 var baseGetAllKeys = __webpack_require__(103),
     getSymbols = __webpack_require__(104),
-    keys = __webpack_require__(36);
+    keys = __webpack_require__(35);
 
 /**
  * Creates an array of own enumerable property names and symbols of `object`.
@@ -12419,7 +12418,7 @@ module.exports = Set;
 /***/ (function(module, exports, __webpack_require__) {
 
 var isStrictComparable = __webpack_require__(110),
-    keys = __webpack_require__(36);
+    keys = __webpack_require__(35);
 
 /**
  * Gets the property names, values, and compare flags of `object`.
@@ -12668,7 +12667,7 @@ module.exports = toString;
 var Symbol = __webpack_require__(23),
     arrayMap = __webpack_require__(112),
     isArray = __webpack_require__(2),
-    isSymbol = __webpack_require__(39);
+    isSymbol = __webpack_require__(38);
 
 /** Used as references for various `Number` constants. */
 var INFINITY = 1 / 0;
@@ -12767,8 +12766,8 @@ module.exports = baseHasIn;
 /* 256 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var castPath = __webpack_require__(38),
-    isArguments = __webpack_require__(37),
+var castPath = __webpack_require__(37),
+    isArguments = __webpack_require__(36),
     isArray = __webpack_require__(2),
     isIndex = __webpack_require__(54),
     isLength = __webpack_require__(56),
@@ -15788,7 +15787,7 @@ module.exports = pickBy;
 
 var baseGet = __webpack_require__(61),
     baseSet = __webpack_require__(292),
-    castPath = __webpack_require__(38);
+    castPath = __webpack_require__(37);
 
 /**
  * The base implementation of  `_.pickBy` without support for iteratee shorthands.
@@ -15823,7 +15822,7 @@ module.exports = basePickBy;
 /***/ (function(module, exports, __webpack_require__) {
 
 var assignValue = __webpack_require__(293),
-    castPath = __webpack_require__(38),
+    castPath = __webpack_require__(37),
     isIndex = __webpack_require__(54),
     isObject = __webpack_require__(8),
     toKey = __webpack_require__(24);
@@ -16084,7 +16083,7 @@ module.exports = nativeKeysIn;
 
 var baseKeys = __webpack_require__(57),
     getTag = __webpack_require__(59),
-    isArguments = __webpack_require__(37),
+    isArguments = __webpack_require__(36),
     isArray = __webpack_require__(2),
     isArrayLike = __webpack_require__(16),
     isBuffer = __webpack_require__(53),
@@ -16823,7 +16822,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
-var _extends2 = _interopRequireDefault(__webpack_require__(31));
+var _extends2 = _interopRequireDefault(__webpack_require__(30));
 
 var _flow = _interopRequireDefault(__webpack_require__(310));
 
@@ -17728,7 +17727,7 @@ module.exports = baseFlatten;
 /***/ (function(module, exports, __webpack_require__) {
 
 var Symbol = __webpack_require__(23),
-    isArguments = __webpack_require__(37),
+    isArguments = __webpack_require__(36),
     isArray = __webpack_require__(2);
 
 /** Built-in value references. */
@@ -20305,7 +20304,7 @@ Webflow.define('lightbox', module.exports = function ($) {
 
 var Webflow = __webpack_require__(3);
 
-var IXEvents = __webpack_require__(25);
+var IXEvents = __webpack_require__(39);
 
 var KEY_CODES = {
   ARROW_LEFT: 37,
@@ -20904,7 +20903,7 @@ Webflow.define('navbar', module.exports = function ($, _) {
 
 var Webflow = __webpack_require__(3);
 
-var IXEvents = __webpack_require__(25);
+var IXEvents = __webpack_require__(39);
 
 var KEY_CODES = {
   ARROW_LEFT: 37,
@@ -21731,363 +21730,6 @@ Webflow.define('slider', module.exports = function ($, _) {
     }
 
     return false;
-  } // Export module
-
-
-  return api;
-});
-
-/***/ }),
-/* 342 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
- // @wf-will-never-add-flow-to-this-file
-
-/* global document window */
-
-/* eslint-disable no-var */
-
-/**
- * Webflow: Tabs component
- */
-
-var Webflow = __webpack_require__(3);
-
-var IXEvents = __webpack_require__(25);
-
-Webflow.define('tabs', module.exports = function ($) {
-  var api = {};
-  var tram = $.tram;
-  var $doc = $(document);
-  var $tabs;
-  var design;
-  var env = Webflow.env;
-  var safari = env.safari;
-  var inApp = env();
-  var tabAttr = 'data-w-tab';
-  var paneAttr = 'data-w-pane';
-  var namespace = '.w-tabs';
-  var linkCurrent = 'w--current';
-  var tabActive = 'w--tab-active';
-  var ix = IXEvents.triggers;
-  var inRedraw = false; // -----------------------------------
-  // Module methods
-
-  api.ready = api.design = api.preview = init;
-
-  api.redraw = function () {
-    inRedraw = true;
-    init();
-    inRedraw = false;
-  };
-
-  api.destroy = function () {
-    $tabs = $doc.find(namespace);
-
-    if (!$tabs.length) {
-      return;
-    }
-
-    $tabs.each(resetIX);
-    removeListeners();
-  }; // -----------------------------------
-  // Private methods
-
-
-  function init() {
-    design = inApp && Webflow.env('design'); // Find all instances on the page
-
-    $tabs = $doc.find(namespace);
-
-    if (!$tabs.length) {
-      return;
-    }
-
-    $tabs.each(build);
-
-    if (Webflow.env('preview') && !inRedraw) {
-      $tabs.each(resetIX);
-    }
-
-    removeListeners();
-    addListeners();
-  }
-
-  function removeListeners() {
-    Webflow.redraw.off(api.redraw);
-  }
-
-  function addListeners() {
-    Webflow.redraw.on(api.redraw);
-  }
-
-  function resetIX(i, el) {
-    var data = $.data(el, namespace);
-
-    if (!data) {
-      return;
-    }
-
-    data.links && data.links.each(ix.reset);
-    data.panes && data.panes.each(ix.reset);
-  }
-
-  function build(i, el) {
-    var widgetHash = namespace.substr(1) + '-' + i;
-    var $el = $(el); // Store state in data
-
-    var data = $.data(el, namespace);
-
-    if (!data) {
-      data = $.data(el, namespace, {
-        el: $el,
-        config: {}
-      });
-    }
-
-    data.current = null;
-    data.tabIdentifier = widgetHash + '-' + tabAttr;
-    data.paneIdentifier = widgetHash + '-' + paneAttr;
-    data.menu = $el.children('.w-tab-menu');
-    data.links = data.menu.children('.w-tab-link');
-    data.content = $el.children('.w-tab-content');
-    data.panes = data.content.children('.w-tab-pane'); // Remove old events
-
-    data.el.off(namespace);
-    data.links.off(namespace); // This role is necessary in the ARIA spec
-
-    data.menu.attr('role', 'tablist'); // Set all tabs unfocusable
-
-    data.links.attr('tabindex', '-1'); // Set config from data attributes
-
-    configure(data); // Wire up events when not in design mode
-
-    if (!design) {
-      data.links.on('click' + namespace, linkSelect(data));
-      data.links.on('keydown' + namespace, handleLinkKeydown(data)); // Trigger first intro event from current tab
-
-      var $link = data.links.filter('.' + linkCurrent);
-      var tab = $link.attr(tabAttr);
-      tab && changeTab(data, {
-        tab: tab,
-        immediate: true
-      });
-    }
-  }
-
-  function configure(data) {
-    var config = {}; // Set config options from data attributes
-
-    config.easing = data.el.attr('data-easing') || 'ease';
-    var intro = parseInt(data.el.attr('data-duration-in'), 10); // eslint-disable-next-line no-self-compare
-
-    intro = config.intro = intro === intro ? intro : 0;
-    var outro = parseInt(data.el.attr('data-duration-out'), 10); // eslint-disable-next-line no-self-compare
-
-    outro = config.outro = outro === outro ? outro : 0;
-    config.immediate = !intro && !outro; // Store config in data
-
-    data.config = config;
-  }
-
-  function getActiveTabIdx(data) {
-    var tab = data.current;
-    return Array.prototype.findIndex.call(data.links, function (t) {
-      return t.getAttribute(tabAttr) === tab;
-    }, null);
-  }
-
-  function linkSelect(data) {
-    return function (evt) {
-      evt.preventDefault();
-      var tab = evt.currentTarget.getAttribute(tabAttr);
-      tab && changeTab(data, {
-        tab: tab
-      });
-    };
-  }
-
-  function handleLinkKeydown(data) {
-    return function (evt) {
-      var currentIdx = getActiveTabIdx(data);
-      var keyName = evt.key;
-      var keyMap = {
-        ArrowLeft: currentIdx - 1,
-        ArrowUp: currentIdx - 1,
-        ArrowRight: currentIdx + 1,
-        ArrowDown: currentIdx + 1,
-        End: data.links.length - 1,
-        Home: 0
-      }; // Bail out of function if this key is not
-      // involved in tab management
-
-      if (!(keyName in keyMap)) return;
-      evt.preventDefault();
-      var nextIdx = keyMap[keyName]; // go back to end of tabs if we wrap past the start
-
-      if (nextIdx === -1) {
-        nextIdx = data.links.length - 1;
-      } // go back to start if we wrap past the last tab
-
-
-      if (nextIdx === data.links.length) {
-        nextIdx = 0;
-      }
-
-      var tabEl = data.links[nextIdx];
-      var tab = tabEl.getAttribute(tabAttr);
-      tab && changeTab(data, {
-        tab: tab
-      });
-    };
-  }
-
-  function changeTab(data, options) {
-    options = options || {};
-    var config = data.config;
-    var easing = config.easing;
-    var tab = options.tab; // Don't select the same tab twice
-
-    if (tab === data.current) {
-      return;
-    }
-
-    data.current = tab;
-    /**
-     * The currently active tab.
-     * Will be referenced to manage focus after
-     * TabLink attributes are changed
-     * @type {HTMLAnchorElement}
-     */
-
-    var currentTab; // Select the current link
-
-    data.links.each(function (i, el) {
-      var $el = $(el); // Add important attributes at build time.
-
-      if (options.immediate || config.immediate) {
-        // Store corresponding pane for reference.
-        var pane = data.panes[i]; // IDs are necessary for ARIA relationships,
-        // so if the user did not create one, we create one
-        // using our generated identifier
-
-        if (!el.id) {
-          el.id = data.tabIdentifier + '-' + i;
-        }
-
-        if (!pane.id) {
-          pane.id = data.paneIdentifier + '-' + i;
-        }
-
-        el.href = '#' + pane.id; // Tab elements must take this role
-
-        el.setAttribute('role', 'tab'); // Tab elements must reference the unique ID of the panel
-        // that they control
-
-        el.setAttribute('aria-controls', pane.id); // Tab elements must report that they are not selected
-        // by default
-
-        el.setAttribute('aria-selected', 'false'); // Panes must take on the `Tabpanel` role
-
-        pane.setAttribute('role', 'tabpanel'); // Elements with tabpanel role must be labelled by
-        // their controlling tab
-
-        pane.setAttribute('aria-labelledby', el.id);
-      }
-
-      if (el.getAttribute(tabAttr) === tab) {
-        // This is the current tab. Store it.
-        currentTab = el;
-        $el.addClass(linkCurrent).removeAttr('tabindex').attr({
-          'aria-selected': 'true'
-        }).each(ix.intro);
-      } else if ($el.hasClass(linkCurrent)) {
-        $el.removeClass(linkCurrent).attr({
-          tabindex: '-1',
-          'aria-selected': 'false'
-        }).each(ix.outro);
-      }
-    }); // Find the new tab panes and keep track of previous
-
-    var targets = [];
-    var previous = [];
-    data.panes.each(function (i, el) {
-      var $el = $(el);
-
-      if (el.getAttribute(tabAttr) === tab) {
-        targets.push(el);
-      } else if ($el.hasClass(tabActive)) {
-        previous.push(el);
-      }
-    });
-    var $targets = $(targets);
-    var $previous = $(previous); // Switch tabs immediately and bypass transitions
-
-    if (options.immediate || config.immediate) {
-      $targets.addClass(tabActive).each(ix.intro);
-      $previous.removeClass(tabActive); // Redraw to benefit components in the hidden tab pane
-      // But only if not currently in the middle of a redraw
-
-      if (!inRedraw) {
-        Webflow.redraw.up();
-      }
-
-      return;
-    } // Focus if this is not the on-page-load call to `changeTab`
-    else {
-        // Backwards compatible hack to prevent focus from scrolling
-        var x = window.scrollX;
-        var y = window.scrollY;
-        currentTab.focus();
-        window.scrollTo(x, y);
-      } // Fade out the currently active tab before intro
-
-
-    if ($previous.length && config.outro) {
-      $previous.each(ix.outro);
-      tram($previous).add('opacity ' + config.outro + 'ms ' + easing, {
-        fallback: safari
-      }).start({
-        opacity: 0
-      }).then(function () {
-        return fadeIn(config, $previous, $targets);
-      });
-    } else {
-      // Skip the outro and play intro
-      fadeIn(config, $previous, $targets);
-    }
-  } // Fade in the new target
-
-
-  function fadeIn(config, $previous, $targets) {
-    // Clear previous active class + styles touched by tram
-    // We cannot remove the whole inline style because it could be dynamically bound
-    $previous.removeClass(tabActive).css({
-      opacity: '',
-      transition: '',
-      transform: '',
-      width: '',
-      height: ''
-    }); // Add active class to new target
-
-    $targets.addClass(tabActive).each(ix.intro);
-    Webflow.redraw.up(); // Set opacity immediately if intro is zero
-
-    if (!config.intro) {
-      return tram($targets).set({
-        opacity: 1
-      });
-    } // Otherwise fade in opacity
-
-
-    tram($targets).set({
-      opacity: 0
-    }).redraw().add('opacity ' + config.intro + 'ms ' + config.easing, {
-      fallback: safari
-    }).start({
-      opacity: 1
-    });
   } // Export module
 
 
